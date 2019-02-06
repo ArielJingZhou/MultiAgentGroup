@@ -6,48 +6,40 @@ f = open('train.csv', 'r')
 rows = f.readlines()[1:]
 f.close()
 # get payprice
-pay_prices = {}
+payprices = 0
 for row in rows:
-    advertiser = row.split(',')[23]
     payprice = row.split(',')[21]
-    if advertiser not in pay_prices.keys():
-        pay_prices[advertiser] = [int(payprice)]
-    else:
-        pay_prices[advertiser].append(int(payprice))
+    payprices += int(payprice)
+
 # get constant_bid_price: mean of pay_price
-constant_bidprice = {}
-for advertiser in pay_prices.keys():
-    constant_bidprice[advertiser] = round(sum(pay_prices[advertiser]) / len(pay_prices[advertiser]))
+constant_bidprice = payprices / len(rows)
 
 # evaluate on validation.csv
 f = open('validation.csv', 'r')
 rows_validation = f.readlines()[1:]
 f.close()
-clicks = {}
-winning_impressions = {}
+clicks = 0
+winning_impressions = 0
+spend = 0
 for row in rows_validation:
-    advertiser = row.split(',')[23]
-    pay_price = row.split(',')[21]
-    if advertiser not in clicks.keys():
-        clicks[advertiser] = 0
-        winning_impressions[advertiser] = 0
-    if constant_bidprice[advertiser] > int(pay_price):
-        winning_impressions[advertiser] += 1
+    payprice = int(row.split(',')[21])
+    if constant_bidprice > payprice:
+        spend += payprice
+        winning_impressions += 1
         if row.split(',')[0] == '1':
-            clicks[advertiser] += 1
+            clicks += 1
+        if spend > 6250:
+            spend = 6250
+            break
 
-click_through_rate = {}
-for advertiser in clicks.keys():
-    click_through_rate[advertiser] = "{:.3%}".format(clicks[advertiser] / winning_impressions[advertiser])
-spend = {}
-for advertiser in clicks.keys():
-    spend[advertiser] = clicks[advertiser] * constant_bidprice[advertiser]
-    if spend[advertiser] > 6250:
-        spend[advertiser] = 6250
-average_cpm = {}
-for advertiser in constant_bidprice.keys():
-    average_cpm[advertiser] = 1000 * constant_bidprice[advertiser]
-average_cpc = constant_bidprice
+click_through_rate = "{:.3%}".format(clicks / winning_impressions)
+
+if clicks == 0:
+    average_cpm = 0
+    average_cpc = 0
+else:
+    average_cpm = spend / clicks * 1000
+    average_cpc = spend / clicks
 
 print('constant_bidprice:\n' + str(constant_bidprice))
 print('\nclicks:\n' + str(clicks))
