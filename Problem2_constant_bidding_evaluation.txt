@@ -2,16 +2,16 @@ constant_bidprice:
 78.151416239
 
 clicks:
-0
+67
 
 click_through_rate:
-0.000%
+0.046%
 
 spend:
 6250
 
 average_cpm:
-0
+93283.5820896
 
 average_cpc:
-0
+93.2835820896
