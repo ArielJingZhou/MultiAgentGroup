@@ -1,0 +1,26 @@
+click_through_rate:
+0.000737562325662
+
+base_bid :
+78.151416239
+
+click_through_rate:
+0.000737562325662
+
+base_bid :
+78.151416239
+
+clicks:
+65
+
+click_through_rate:
+0.050%
+
+spend:
+6250
+
+average_cpm:
+96153.8461538
+
+average_cpc:
+96.1538461538
