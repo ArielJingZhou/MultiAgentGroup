@@ -6,9 +6,10 @@ clicks = 0
 winning_impressions = 0
 spend = 0
 
-def randbid():
+
+def randbid(train_file):
     results = []
-    with open("train.csv") as csvfile:
+    with open(str(train_file)) as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         for row in reader:
             results.append(row[21])
@@ -23,8 +24,9 @@ def randbid():
     random_bidprice = randint(lower_bound,upper_bound)
     return random_bidprice
 
-def evaluate(random_bidprice):
-    f = open('validation.csv', 'r')
+
+def evaluate(validation_file, random_bidprice):
+    f = open(str(validation_file), 'r')
     rows_validation = f.readlines()[1:]
     f.close()
     clicks = 0
@@ -52,12 +54,14 @@ def evaluate(random_bidprice):
 
     printResults(random_bidprice, clicks, click_through_rate, spend, average_cpm, average_cpc)
 
+
 def printResults(rnd_bidprice, clicks, ctr, spend, avg_cpm, avg_cpc):
-    print('Random Bid Price:' + str(rnd_bidprice))
-    print('Clicks:' + str(clicks))
-    print('Click Through Rate:' + str(ctr))
+    print('Random Bid Price: ' + str(rnd_bidprice))
+    print('Clicks: ' + str(clicks))
+    print('Click Through Rate: ' + str(ctr))
     print('Spend: ' + str(spend))
-    print('Average CPM:' + str(avg_cpm))
+    print('Average CPM: ' + str(avg_cpm))
     print('Average CPC: ' + str(avg_cpc))
 
-evaluate(randbid())
+
+evaluate("validation.csv", randbid("train.csv"))
