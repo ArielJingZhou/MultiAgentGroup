@@ -1,0 +1,17 @@
+Random_bidprice:
+96
+
+clicks:
+0
+
+click_through_rate:
+0.000%
+
+spend:
+6250
+
+average_cpm:
+0
+
+average_cpc:
+0
