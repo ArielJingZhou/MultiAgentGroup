@@ -49,7 +49,7 @@ def evaluate(validation_file, random_bidprice):
         average_cpm = 0
         average_cpc = 0
     else:
-        average_cpm = spend / clicks * 1000
+        average_cpm = spend / winning_impressions * 1000
         average_cpc = spend / clicks
 
     printResults(random_bidprice, clicks, click_through_rate, spend, average_cpm, average_cpc)
