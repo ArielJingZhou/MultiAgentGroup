@@ -27,7 +27,7 @@ def const(constant_bidprice):
     spend = 0
     for row in rows_validation:
         payprice = int(row.split(',')[21])
-        if constant_bidprice > payprice:
+        if constant_bidprice >= payprice:
             spend += payprice / 1000
             winning_impressions += 1
             if row.split(',')[0] == '1':
@@ -42,7 +42,7 @@ def const(constant_bidprice):
         average_cpm = 0
         average_cpc = 0
     else:
-        average_cpm = spend / clicks * 1000
+        average_cpm = spend / winning_impressions * 1000
         average_cpc = spend / clicks
 
     print('constant_bidprice:\n' + str(constant_bidprice))
