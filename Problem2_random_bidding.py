@@ -33,7 +33,7 @@ def evaluate(random_bidprice):
     for row in rows_validation:
         payprice = int(row.split(',')[21])
         if random_bidprice > payprice:
-            spend += payprice
+            spend += payprice / 1000
             winning_impressions += 1
             if row.split(',')[0] == '1':
                 clicks += 1
@@ -50,11 +50,14 @@ def evaluate(random_bidprice):
         average_cpm = spend / clicks * 1000
         average_cpc = spend / clicks
 
-    print('Random_bidprice:\n' + str(random_bidprice))
-    print('\nclicks:\n' + str(clicks))
-    print('\nclick_through_rate:\n' + str(click_through_rate))
-    print('\nspend:\n' + str(spend))
-    print('\naverage_cpm:\n' + str(average_cpm))
-    print('\naverage_cpc:\n' + str(average_cpc))
+    printResults(random_bidprice, clicks, click_through_rate, spend, average_cpm, average_cpc)
+
+def printResults(rnd_bidprice, clicks, ctr, spend, avg_cpm, avg_cpc):
+    print('Random Bid Price:' + str(rnd_bidprice))
+    print('Clicks:' + str(clicks))
+    print('Click Through Rate:' + str(ctr))
+    print('Spend: ' + str(spend))
+    print('Average CPM:' + str(avg_cpm))
+    print('Average CPC: ' + str(avg_cpc))
 
 evaluate(randbid())
