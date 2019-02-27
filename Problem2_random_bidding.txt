@@ -1,6 +1,0 @@
-Random Bid Price: 295
-Clicks: 51
-Click Through Rate: 0.064%
-Spend: 6250
-Average CPM: 78.19928932485861
-Average CPC: 122.54901960784314
