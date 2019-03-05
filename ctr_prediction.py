@@ -9,7 +9,7 @@ import warnings
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import SGDClassifier, LogisticRegression
+from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import roc_auc_score
 from sklearn.externals import joblib
@@ -51,22 +51,23 @@ def process_data():
             del row['click'], row['bidid'], row['userid'], row['useragent'], row['IP'], row['adexchange'], \
                 row['domain'], row['url'], row['urlid'], row['slotid'], row['slotvisibility'], row['creative'], \
                 row['bidprice'], row['payprice'], row['keypage'], row['usertag']
-            
+            '''
             # Append input to X
             
             X_dict.append({'weekday': row['weekday'], 'hour': row['hour'], 'region': row['region'],\
                            'city': row['city'], 'slotwidth': row['slotwidth'], 'slotheight': row['slotheight'],\
                            'slotformat': row['slotformat'], 'slotprice': row['slotprice'],\
-                           'advertiser': row['advertiser']})
+                           'advertiser': row['advertiser'], 'useragent': row['useragent'], 'adexchange': row['adexchange'], \
+                           'domain': row['domain'], 'url': row['url'], 'slotvisibility': row['slotvisibility'], 'keypage': row['keypage'], \
+                           'usertag': row['usertag'], 'creative': row['creative']})
             '''
-            X_dict.append({'slotprice': row['slotprice'], 'useragent': row['useragent'],\
-                           'advertiser': row['advertiser']})
+            X_dict.append({'slotprice': row['slotprice'], 'useragent': row['useragent'],
+                           'advertiser': row['advertiser']})'''
     print(X_dict[0])
     return X_dict, y
 
 def process_test_data():
     X_dict = []
-    y = []
 
     # Open file
     with open('validation.csv', 'r') as csvfile:
@@ -74,24 +75,25 @@ def process_test_data():
         reader = csv.DictReader(csvfile)
 
         for row in reader:
-            y.append(int(row['click']))
             # Remove features
             '''
             del row['click'], row['bidid'], row['userid'], row['IP'], row['adexchange'], \
                 row['domain'], row['url'], row['urlid'], row['slotid'], row['slotvisibility'], row['creative'], \
                 row['bidprice'], row['payprice'], row['keypage'], row['usertag']
-
+            '''
             # Append input to X
             
             X_dict.append({'weekday': row['weekday'], 'hour': row['hour'], 'region': row['region'],\
                            'city': row['city'], 'slotwidth': row['slotwidth'], 'slotheight': row['slotheight'],\
                            'slotformat': row['slotformat'], 'slotprice': row['slotprice'],\
-                           'advertiser': row['advertiser']})
+                           'advertiser': row['advertiser'], 'useragent': row['useragent'], 'adexchange': row['adexchange'], \
+                           'domain': row['domain'], 'url': row['url'], 'slotvisibility': row['slotvisibility'], 'keypage': row['keypage'], \
+                           'usertag': row['usertag'], 'creative': row['creative']})
             '''
             X_dict.append({'slotprice': row['slotprice'], 'useragent': row['useragent'],\
                            'advertiser': row['advertiser']})
-
-    return X_dict, y
+            '''
+    return X_dict
 
 
 #
@@ -225,7 +227,7 @@ def random_forest(load_model=False):
         printGreen('✔  ROC AUC score on test set: {0:.3f}'.format(score))
         r_forest_file.close()
         return 0
-
+    
     # Train random forest classifier
     params = {'max_depth': [3, 10, None]}
     random_forest_model = RandomForestClassifier(n_estimators=100, criterion='gini', min_samples_split=30,
@@ -238,7 +240,7 @@ def random_forest(load_model=False):
     random_forest_final = grid_search.best_estimator_
 
     # Save Model
-    random_forest_file = open('../models/random_forest_model_3feature.sav', "wb")
+    random_forest_file = open('random_forest_model_3feature.sav', "wb")
     pickle.dump(random_forest_final, random_forest_file)
     random_forest_file.close()
     printGreen('✔  Random forest model saved...')
@@ -259,9 +261,8 @@ def random_forest(load_model=False):
 #
 # SGD-BASED LOGISTIC REGRESSION ~20 sec. to train
 #
-def logistic_regression(sample_size=100000, load_model=True):
+def logistic_regression(sample_size=100000, load_model=False):
     start = time.time()
-
     if load_model == False:
         printYellow("*  Logistic regression model training started...")
 
@@ -278,38 +279,26 @@ def logistic_regression(sample_size=100000, load_model=True):
     X_train_n = X_train
     y_train_n = np.array(y_train)
 
-
     # Load model instead of training again
     if load_model == True:
         printGreen('✔  Loading model from previous training...')
         l_reg_file = open('../models/logistic_regression_model.sav', 'rb')
-        log_reg_model = pickle.load(l_reg_file)
-        predictions = log_reg_model.predict_proba(X_test)[:, 1]
+        sgd_log_reg_model = pickle.load(l_reg_file)
+        predictions = sgd_log_reg_model.predict_proba(X_test)[:, 1]
         score = roc_auc_score(y_test, predictions)
         printGreen("✔  ROC AUC score on test set: {0:.3f}".format(score))
-
-        # Evaluate and run model on training data
-        f = open('logistic_regression_base_bid.csv', 'w')
-        f.write('base_bid,clicks\n')
-        for base_bid in range(50, 90, 1):
-            score = bidding(predictions, base_bid)
-            #printGreen('✔  clicks on test set:' + str(score))
-        f.write(str(base_bid) + ',' + str(score) + '\n')
-        f.close()
-        printGreen('✔  clicks on test set:' + str(score))
-
         return 0
 
-    '''
     # Create SGD Logistic Regression Classifier
-    log_reg_model = LogisticRegression()
+    sgd_log_reg_model = SGDClassifier(loss='log', penalty=None, fit_intercept=True,
+                                      n_iter=5, learning_rate='constant', eta0=0.01)
 
     # Train Classifier
-    log_reg_model.fit(X_train_n, y_train_n)
+    sgd_log_reg_model.fit(X_train_n, y_train_n)
     printGreen('✔  Logistic regression model training complete..."\t\t{0:.1f}s'.format(time.time() - start))
 
     # Run model on test set
-    predictions = log_reg_model.predict_proba(X_test)[:, 1]
+    predictions = sgd_log_reg_model.predict_proba(X_test)[:, 1]
 
     # Evaluate model
     score = roc_auc_score(y_test, predictions)
@@ -317,25 +306,20 @@ def logistic_regression(sample_size=100000, load_model=True):
 
     # Save model
     l_reg_file = open('../models/logistic_regression_model.sav', "wb")
-    pickle.dump(log_reg_model, l_reg_file)
+    pickle.dump(sgd_log_reg_model, l_reg_file)
     l_reg_file.close()
     printGreen('✔  Logistic regression model saved...')
-
-    '''
-
 
 #
 # LOGISTIC REGRESSION USING ONLINE LEARNING ~6 min. to train
 #
-def logistic_regression_ol(load_model=True):
+def logistic_regression_ol(load_model=False):
     start = time.time()
-
-
     if load_model == False:
         printYellow("*  Logistic regression (using online learning) model training started...")
 
     # Build Classifier
-    og_reg_model = LogisticRegression()
+    sgd_log_reg_model = SGDClassifier(loss='log', penalty=None, fit_intercept=True, n_iter=1, learning_rate='constant', eta0=0.01)
     
     # Training sets
     X_dict_train, y_train = process_data()
@@ -349,32 +333,13 @@ def logistic_regression_ol(load_model=True):
     X_dict_test, y_test_next10k = process_test_data()
     X_test_next10k = dict_one_hot_encoder.transform(X_dict_test)
 
-    if load_model == True:
-        printGreen('✔  Loading model from previous training...')
-        l_reg_file = open('../models/logistic_regression_model_ol.sav', 'rb')
-        log_reg_model = pickle.load(l_reg_file)
-        predictions = log_reg_model.predict_proba(X_test_next10k)[:, 1]
-        score = roc_auc_score(y_test_next10k, predictions)
-        printGreen("✔  ROC AUC score on test set: {0:.3f}".format(score))
 
-        # Evaluate and run model on training data
-        f = open('logistic_regression_ol_base_bid.csv', 'w')
-        f.write('base_bid,clicks\n')
-        for base_bid in range(50, 90, 1):
-            score = bidding(predictions, base_bid)
-            #printGreen('✔  clicks on test set:' + str(score))
-        f.write(str(base_bid) + ',' + str(score) + '\n')
-        f.close()
-        printGreen('✔  clicks on test set:' + str(score))
 
-        return 0
-
-    '''
     # Train and partially fit on 1 million samples
     for i in range(20):
         X_dict_train, y_train_every = process_data()
         X_train_every = dict_one_hot_encoder.transform(X_dict_train)
-        og_reg_model.fit(X_train_every, y_train_every)
+        sgd_log_reg_model.partial_fit(X_train_every, y_train_every, classes=[0, 1])
     
     printGreen('✔  Logistic regression (using online learning) model training complete..."\t\t{0:.1f}s'.format(time.time() - start))
     
@@ -383,17 +348,17 @@ def logistic_regression_ol(load_model=True):
     X_test_next = dict_one_hot_encoder.transform(X_dict_test)
     
     # Evaluate
-    predict = og_reg_model.predict_proba(X_test_next)[:, 1]
+    predict = sgd_log_reg_model.predict_proba(X_test_next)[:, 1]
     score = roc_auc_score(y_test_next, predict)
     printGreen("✔  ROC AUC score on test set: {0:.3f}".format(score))
 
     # Save Model
     l_reg_file = open('../models/logistic_regression_model_ol.sav', "wb")
-    pickle.dump(og_reg_model, l_reg_file)
+    pickle.dump(sgd_log_reg_model, l_reg_file)
     l_reg_file.close()
     printGreen('✔  Logistic regression (using online learning) model saved...')
     return 0
-    '''
+
 #
 # MAIN
 #
@@ -406,25 +371,21 @@ def main():
     decision_tree(load_model=True)
     print('\n')
     '''
-    '''
     # Random Forest
     printGreen('Random Forest')
     random_forest(load_model=False)
     print('\n')
     '''
-
     # Logistic Regression
-    printGreen('Logistic Regression')
+    printGreen('SGD Based Logistic Regression')
     logistic_regression(load_model=True)
     print('\n')
-
 
     # OL Logistic Regression
     printGreen('Logistic Regressions using Online Learning')
     logistic_regression_ol(load_model=True)
     print('\n')
-
-
+    '''
     printGreen("✔  Done")
 
 if __name__ == '__main__':
