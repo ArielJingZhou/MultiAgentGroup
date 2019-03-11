@@ -110,12 +110,12 @@ def predict_CTR():
                     early_stopping_rounds=100)
     '''
     #save model
-    model_file = open('../models/lgbm_model.sav', "wb")
+    model_file = open('./models/lgbm_model.sav', "wb")
     pickle.dump(gbm, model_file)
     model_file.close()
     
     #load model
-    model_file = open('../models/lgbm_model.sav', 'rb')
+    model_file = open('./models/lgbm_model.sav', 'rb')
     gbm = pickle.load(model_file)
     '''
     print('Starting prediction...')
