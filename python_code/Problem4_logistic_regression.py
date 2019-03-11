@@ -142,7 +142,7 @@ def logistic_regression(sample_size=100000, load_model=True):
     # Load model instead of training again
     if load_model == True:
         printGreen('✔  Loading model from previous training...')
-        l_reg_file = open('../models/logistic_regression_model.sav', 'rb')
+        l_reg_file = open('./models/logistic_regression_model.sav', 'rb')
         log_reg_model = pickle.load(l_reg_file)
         predictions = log_reg_model.predict_proba(X_test)[:, 1]
         score = roc_auc_score(y_test, predictions)
@@ -176,7 +176,7 @@ def logistic_regression(sample_size=100000, load_model=True):
     printGreen("✔  ROC AUC score on test set: {0:.3f}".format(score))
 
     # Save model
-    l_reg_file = open('../models/logistic_regression_model.sav', "wb")
+    l_reg_file = open('./models/logistic_regression_model.sav', "wb")
     pickle.dump(log_reg_model, l_reg_file)
     l_reg_file.close()
     printGreen('✔  Logistic regression model saved...')
@@ -211,7 +211,7 @@ def logistic_regression_ol(load_model=True):
 
     if load_model == True:
         printGreen('✔  Loading model from previous training...')
-        l_reg_file = open('../models/logistic_regression_model_ol.sav', 'rb')
+        l_reg_file = open('./models/logistic_regression_model_ol.sav', 'rb')
         log_reg_model = pickle.load(l_reg_file)
         predictions = log_reg_model.predict_proba(X_test_next10k)[:, 1]
         score = roc_auc_score(y_test_next10k, predictions)
@@ -248,7 +248,7 @@ def logistic_regression_ol(load_model=True):
     printGreen("✔  ROC AUC score on test set: {0:.3f}".format(score))
 
     # Save Model
-    l_reg_file = open('../models/logistic_regression_model_ol.sav', "wb")
+    l_reg_file = open('./models/logistic_regression_model_ol.sav', "wb")
     pickle.dump(og_reg_model, l_reg_file)
     l_reg_file.close()
     printGreen('✔  Logistic regression (using online learning) model saved...')
