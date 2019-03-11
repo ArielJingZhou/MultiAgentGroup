@@ -1,9 +1,0 @@
-clicks:58
-
-click_through_rate:0.054%
-
-spend:6250.0
-
-average_cpm:58.32835598028968
-
-average_cpc:107.75862068965517
